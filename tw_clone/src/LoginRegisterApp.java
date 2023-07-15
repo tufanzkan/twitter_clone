@@ -59,23 +59,13 @@ public class LoginRegisterApp extends JFrame {
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String username = usernameField.getText();
-                String password = new String(passwordField.getPassword());
-
                 RegisterManager registerManager = new RegisterManager();
-                boolean registered = registerManager.register(username, password);
-
-                if (registered) {
-                    JOptionPane.showMessageDialog(LoginRegisterApp.this, "Registration successfully completed!");
-                } else {
-                    JOptionPane.showMessageDialog(LoginRegisterApp.this, "Registration failed!");
-                }
+                registerManager.entry();
             }
         });
 
         add(topPanel);
         add(bottomPanel);
-
         pack();
         setVisible(true);
     }
