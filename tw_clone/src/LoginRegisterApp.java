@@ -10,9 +10,12 @@ public class LoginRegisterApp extends JFrame {
     private JButton registerButton;
 
     public LoginRegisterApp() {
-        setTitle("Login/Register App");
+        setTitle("Login/Register Screen");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new FlowLayout());
+        setLayout(new GridLayout(2,2));
+
+        JPanel topPanel= new JPanel(new GridLayout(2,2));
+        JPanel bottomPanel= new JPanel(new GridLayout(3,1));
 
         JLabel usernameLabel = new JLabel("Username:");
         JLabel passwordLabel = new JLabel("Password:");
@@ -20,8 +23,19 @@ public class LoginRegisterApp extends JFrame {
         usernameField = new JTextField(20);
         passwordField = new JPasswordField(20);
 
+        topPanel.add(usernameLabel);
+        topPanel.add(usernameField);
+        topPanel.add(passwordLabel);
+        topPanel.add(passwordField);
+
         loginButton = new JButton("Login");
+        JLabel textField = new JLabel("Not a Member Yet..?");
+        textField.setHorizontalAlignment(SwingConstants.CENTER);
         registerButton = new JButton("Register");
+
+        bottomPanel.add(loginButton);
+        bottomPanel.add(textField);
+        bottomPanel.add(registerButton);
 
         // Login Button Action Listener
         loginButton.addActionListener(new ActionListener() {
@@ -59,12 +73,8 @@ public class LoginRegisterApp extends JFrame {
             }
         });
 
-        add(usernameLabel);
-        add(usernameField);
-        add(passwordLabel);
-        add(passwordField);
-        add(loginButton);
-        add(registerButton);
+        add(topPanel);
+        add(bottomPanel);
 
         pack();
         setVisible(true);
