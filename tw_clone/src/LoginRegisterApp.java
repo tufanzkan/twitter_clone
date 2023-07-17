@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 
 public class LoginRegisterApp extends JFrame {
     private JTextField usernameField;
@@ -41,17 +42,15 @@ public class LoginRegisterApp extends JFrame {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String username = usernameField.getText();
-                String password = new String(passwordField.getPassword());
-
-                LoginManager loginManager = new LoginManager();
-                boolean loggedIn = loginManager.login(username, password);
-
-                if (loggedIn) {
-                    JOptionPane.showMessageDialog(LoginRegisterApp.this, "Login successful!");
-                } else {
-                    JOptionPane.showMessageDialog(LoginRegisterApp.this, "Invalid username or password!");
+                LoginManager loginManager = null;
+                try {
+                    loginManager = new LoginManager();
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
                 }
+                char[] passwordChars = passwordField.getPassword();
+                String password = new String(passwordChars);
+                loginManager.login(usernameField.getText(),password);
             }
         });
 
@@ -60,7 +59,7 @@ public class LoginRegisterApp extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 RegisterManager registerManager = new RegisterManager();
-                registerManager.entry();
+                registerManager.register();
             }
         });
 

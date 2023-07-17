@@ -12,7 +12,7 @@ public class RegisterManager {
     PreparedStatement stmt = null;
     public JTextField usernameField,nameField,surnameField,emailField,passwordField;
     public  JPanel messagePanel;
-    public void entry() {
+    public void register() {
 
         JFrame frame = new JFrame();
         frame.setVisible(true);
@@ -85,7 +85,7 @@ public class RegisterManager {
             // SQL sorgusunu çalıştır
             stmt.executeUpdate();
 
-            JOptionPane.showMessageDialog(messagePanel, "Kayıt başarıyla eklendi!");
+            JOptionPane.showMessageDialog(messagePanel, "Register Succsessful!");
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
