@@ -7,44 +7,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Homepage extends JFrame {
-
     PreparedStatement stmt = null;
-    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydatabase","root","theozkan1905");
-    public JPanel messagePanel;
-    public List<JPanel> textPanels;
-    public List<Integer> likeCounts;
+    Connection conn = null;
+    String url = "jdbc:mysql://localhost:3306/mydatabase";
+    String usrnm = "root";
+    String password = "theozkan1905";
+    JPanel contentPanel = new JPanel();
+    JScrollPane scrollPane = new JScrollPane(contentPanel);
 
     public Homepage(String username) throws SQLException {
         // JFrame ayarları
-        setTitle("Texts with Likes");
-        setSize(400, 300);
+        setTitle("HomePage");
+        setSize(500, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
-        // Text ve Like sayısını saklamak için listeler oluşturun
-        textPanels = new ArrayList<>();
-        likeCounts = new ArrayList<>();
+        add(scrollPane);
 
         JLabel namelabel = new JLabel("    "+username);
         JButton button = new JButton("Tweet");
         JPanel panel= new JPanel(new GridLayout(1,2));
         panel.add(namelabel);
         panel.add(button);
+        contentPanel.add(panel);
+        tweetshow();
+
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                try {
+                    conn = DriverManager.getConnection(url,usrnm,password);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
                 // JTextArea'dan metin alın
                 String inputText = JOptionPane.showInputDialog(Homepage.this, "Write Tweet..");
                 if (inputText != null && !inputText.trim().isEmpty()) {
-                    // Metni yeni bir kutucukta göster
-                    addTextPanel(inputText);
-
+                    try {
+                        tweetshow();
+                    } catch (SQLException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     try {
                         String sql = "INSERT INTO tweets (username, tweet) VALUES (?, ?)";
                         stmt = conn.prepareStatement(sql);
                         stmt.setString(1, username);
                         stmt.setString(2, inputText);
-
                         // SQL sorgusunu çalıştır
                         stmt.executeUpdate();
 
@@ -63,45 +70,64 @@ public class Homepage extends JFrame {
                     }
                 }
             }
-
         });
-        // JButton'u JFrame'e ekleme
-        add(panel);
     }
+    public void tweetshow() throws SQLException {
 
-    private void addTextPanel(String text) {
-        // Metin kutucuğunu içeren JPanel oluşturun
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        conn = DriverManager.getConnection(url,usrnm,password);
 
-        // JTextArea oluşturun ve metni ekle
-        JTextArea textArea = new JTextArea(text);
-        textArea.setEditable(false);
+        Statement statement = conn.createStatement();
+        String sorgu = "SELECT id, tweet, username, likecount FROM tweets";
 
-        // Beğeni sayısını saklamak için değişken oluşturun ve 0 olarak ayarlayın
-        int likeCount = 0;
-        likeCounts.add(likeCount);
+        ResultSet resultSet = statement.executeQuery(sorgu);
 
-        // Beğeni butonunu oluşturun
-        JButton likeButton = new JButton("Beğen: " + likeCount);
-        likeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Beğeni sayısını artır ve düğme metnini güncelle
-                likeCounts.set(textPanels.indexOf(panel), likeCounts.get(textPanels.indexOf(panel)) + 1);
-                likeButton.setText("Beğen: " + likeCounts.get(textPanels.indexOf(panel)));
+        while (resultSet.next()) {
+            int id = resultSet.getInt("id");
+            String cumle = resultSet.getString("tweet");
+            String yazar = resultSet.getString("username");
+            final int[] begeniSayisi = {resultSet.getInt("likecount")};
+
+            JPanel tpanel = new JPanel(new BorderLayout());
+            JTextArea textArea = new JTextArea("  "+ yazar + "\n\n Tweet: " + cumle);
+            textArea.setEditable(false);
+            tpanel.add(textArea, BorderLayout.CENTER);
+
+            JButton likeButton = new JButton("Like (" + begeniSayisi[0] + ")");
+            likeButton.addActionListener(new ActionListener() {
+                private boolean isLiked = false;
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (!isLiked) {
+                        // Beğeni butonuna tıklandığında beğeni sayısını artır
+                        begeniSayisi[0]++;
+                        likeButton.setText("Like (" + begeniSayisi[0] + ")");
+
+                        // Veritabanına bağlanarak beğeni sayısını güncelle
+                        try {
+                            String updateSorgu = "UPDATE tweets SET likecount = ? WHERE id = ?";
+                            PreparedStatement preparedStatement = conn.prepareStatement(updateSorgu);
+                            preparedStatement.setInt(1, begeniSayisi[0]);
+                            preparedStatement.setInt(2, id);
+                            preparedStatement.executeUpdate();
+                            preparedStatement.close();
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
+                        isLiked = true; // Buton artık tıklanamaz hale gelir
+                    }
+                }
+            });
+
+            tpanel.add(likeButton, BorderLayout.SOUTH);
+            contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+            for (int i = 1; i <= 20; i++) {
+                contentPanel.add(tpanel);
             }
-        });
-
-        // JTextArea ve Beğeni butonunu panel'e ekle
-        panel.add(textArea, BorderLayout.CENTER);
-        panel.add(likeButton, BorderLayout.SOUTH);
-
-        // Paneli JFrame'e ekle ve güncelle
-        textPanels.add(panel);
-        add(panel);
-        revalidate();
-        repaint();
+            revalidate();
+            repaint();
+        }
+        resultSet.close();
+        statement.close();
     }
+
 }
