@@ -2,15 +2,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Homepage extends JFrame {
 
-    private List<JPanel> textPanels;
-    private List<Integer> likeCounts;
+    PreparedStatement stmt = null;
+    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydatabase","root","theozkan1905");
+    public JPanel messagePanel;
+    public List<JPanel> textPanels;
+    public List<Integer> likeCounts;
 
-    public Homepage() {
+    public Homepage(String username) throws SQLException {
         // JFrame ayarları
         setTitle("Texts with Likes");
         setSize(400, 300);
@@ -21,21 +25,48 @@ public class Homepage extends JFrame {
         textPanels = new ArrayList<>();
         likeCounts = new ArrayList<>();
 
-        // JButton oluşturma ve ActionListener eklemek
-        JButton button = new JButton("Yaz");
+        JLabel namelabel = new JLabel("    "+username);
+        JButton button = new JButton("Tweet");
+        JPanel panel= new JPanel(new GridLayout(1,2));
+        panel.add(namelabel);
+        panel.add(button);
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // JTextArea'dan metin alın
-                String inputText = JOptionPane.showInputDialog(Homepage.this, "Yazı ekleyin:");
+                String inputText = JOptionPane.showInputDialog(Homepage.this, "Write Tweet..");
                 if (inputText != null && !inputText.trim().isEmpty()) {
                     // Metni yeni bir kutucukta göster
                     addTextPanel(inputText);
+
+                    try {
+                        String sql = "INSERT INTO tweets (username, tweet) VALUES (?, ?)";
+                        stmt = conn.prepareStatement(sql);
+                        stmt.setString(1, username);
+                        stmt.setString(2, inputText);
+
+                        // SQL sorgusunu çalıştır
+                        stmt.executeUpdate();
+
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    } finally {
+                        // Kaynakları serbest bırak
+                        try {
+                            if (stmt != null)
+                                stmt.close();
+                            if (conn != null)
+                                conn.close();
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
                 }
             }
+
         });
         // JButton'u JFrame'e ekleme
-        add(button);
+        add(panel);
     }
 
     private void addTextPanel(String text) {
@@ -72,15 +103,5 @@ public class Homepage extends JFrame {
         add(panel);
         revalidate();
         repaint();
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                Homepage frame = new Homepage();
-                frame.setVisible(true);
-            }
-        });
     }
 }

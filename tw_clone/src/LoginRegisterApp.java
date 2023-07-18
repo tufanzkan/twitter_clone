@@ -5,10 +5,10 @@ import java.awt.event.ActionListener;
 import java.sql.SQLException;
 
 public class LoginRegisterApp extends JFrame {
-    private JTextField usernameField;
-    private JPasswordField passwordField;
-    private JButton loginButton;
-    private JButton registerButton;
+    public JTextField usernameField;
+    public JPasswordField passwordField;
+    public JButton loginButton;
+    public JButton registerButton;
 
     public LoginRegisterApp() {
         setTitle("Login/Register Screen");

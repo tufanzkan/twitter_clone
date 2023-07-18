@@ -74,7 +74,7 @@ public class RegisterManager {
             int password = Integer.parseInt(passwordField.getText());
 
             // SQL sorgusu ve parametreleri
-            String sql = "INSERT INTO tw (username, name, surname, email, password) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO users (username, name, surname, email, password) VALUES (?, ?, ?, ?, ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
             stmt.setString(2, name);
