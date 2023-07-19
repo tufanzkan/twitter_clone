@@ -120,9 +120,7 @@ public class Homepage extends JFrame {
 
             tpanel.add(likeButton, BorderLayout.SOUTH);
             contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-            for (int i = 1; i <= 20; i++) {
-                contentPanel.add(tpanel);
-            }
+            contentPanel.add(tpanel);
             revalidate();
             repaint();
         }
