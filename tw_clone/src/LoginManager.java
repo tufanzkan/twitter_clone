@@ -10,6 +10,7 @@ public class LoginManager {
     public LoginManager() throws SQLException {}
 
     public void login(String username, String password) {
+
         try {
             while (myRes.next()) {
                 if (myRes.getString("username").equals(username) && myRes.getString("password").equals(password)) {

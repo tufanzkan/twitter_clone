@@ -23,10 +23,21 @@ public class Homepage extends JFrame {
 
         add(scrollPane);
 
+        conn = DriverManager.getConnection(url,usrnm,password);
+        Statement stment = conn.createStatement();
+        String sorg = "SELECT followers FROM users";
+        ResultSet resultS = stment.executeQuery(sorg);
+        int flwrs = 0;
+        while (resultS.next()){
+            flwrs = resultS.getInt("followers");
+        }
+
         JLabel namelabel = new JLabel("    "+username);
+        JLabel flwLabel = new JLabel("          Followers: "+flwrs);
         JButton button = new JButton("Tweet");
-        JPanel panel= new JPanel(new GridLayout(1,2));
+        JPanel panel= new JPanel(new GridLayout(1,3));
         panel.add(namelabel);
+        panel.add(flwLabel);
         panel.add(button);
         contentPanel.add(panel);
         tweetshow();
@@ -42,11 +53,6 @@ public class Homepage extends JFrame {
                 // JTextArea'dan metin alın
                 String inputText = JOptionPane.showInputDialog(Homepage.this, "Write Tweet..");
                 if (inputText != null && !inputText.trim().isEmpty()) {
-                    try {
-                        tweetshow();
-                    } catch (SQLException ex) {
-                        throw new RuntimeException(ex);
-                    }
                     try {
                         String sql = "INSERT INTO tweets (username, tweet) VALUES (?, ?)";
                         stmt = conn.prepareStatement(sql);
@@ -77,9 +83,12 @@ public class Homepage extends JFrame {
         conn = DriverManager.getConnection(url,usrnm,password);
 
         Statement statement = conn.createStatement();
+        Statement statemen2 = conn.createStatement();
         String sorgu = "SELECT id, tweet, username, likecount FROM tweets";
+        String sorg2 = "SELECT id, followers FROM users";
 
         ResultSet resultSet = statement.executeQuery(sorgu);
+        ResultSet resultSe2 = statemen2.executeQuery(sorg2);
 
         while (resultSet.next()) {
             int id = resultSet.getInt("id");
@@ -90,9 +99,10 @@ public class Homepage extends JFrame {
             JPanel tpanel = new JPanel(new BorderLayout());
             JTextArea textArea = new JTextArea("  "+ yazar + "\n\n Tweet: " + cumle);
             textArea.setEditable(false);
-            tpanel.add(textArea, BorderLayout.CENTER);
+            tpanel.add(textArea,BorderLayout.CENTER);
 
             JButton likeButton = new JButton("Like (" + begeniSayisi[0] + ")");
+            JButton followButton = new JButton("Follow");
             likeButton.addActionListener(new ActionListener() {
                 private boolean isLiked = false;
                 @Override
@@ -118,14 +128,48 @@ public class Homepage extends JFrame {
                 }
             });
 
-            tpanel.add(likeButton, BorderLayout.SOUTH);
+            while (resultSe2.next()) {
+                int id2 = resultSe2.getInt("id");
+                final int[] takipciSayisi = {resultSe2.getInt("followers")};
+                followButton.addActionListener(new ActionListener() {
+                    private boolean isfollowed = false;
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (!isfollowed) {
+                            // Beğeni butonuna tıklandığında beğeni sayısını artır
+                            takipciSayisi[0]++;
+                            followButton.setText("Followed");
+                            // Veritabanına bağlanarak beğeni sayısını güncelle
+                            try {
+                                String updateSorgu = "UPDATE users SET followers = ? WHERE id = ?";
+                                PreparedStatement preparedStatemen2 = conn.prepareStatement(updateSorgu);
+                                preparedStatemen2.setInt(1, takipciSayisi[0]);
+                                preparedStatemen2.setInt(2, id2);
+                                preparedStatemen2.executeUpdate();
+                                preparedStatemen2.close();
+                            } catch (SQLException ex) {
+                                ex.printStackTrace();
+                            }
+                            isfollowed = true; // Buton artık tıklanamaz hale gelir
+                        }
+                    }
+                });
+            }
+
+            JPanel likefollow = new JPanel(new GridLayout(1,2));
+            likefollow.add(likeButton);
+            likefollow.add(followButton);
+
+            tpanel.add(likefollow,BorderLayout.SOUTH);
             contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
             contentPanel.add(tpanel);
             revalidate();
             repaint();
         }
         resultSet.close();
+        resultSe2.close();
         statement.close();
+        statemen2.close();
     }
 
 }
