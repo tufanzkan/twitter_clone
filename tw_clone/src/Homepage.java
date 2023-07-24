@@ -85,7 +85,7 @@ public class Homepage extends JFrame {
         Statement statement = conn.createStatement();
         Statement statemen2 = conn.createStatement();
         String sorgu = "SELECT id, tweet, username, likecount FROM tweets";
-        String sorg2 = "SELECT id, followers FROM users";
+        String sorg2 = "SELECT id, username, name, surname, email, password, followers FROM users";
 
         ResultSet resultSet = statement.executeQuery(sorgu);
         ResultSet resultSe2 = statemen2.executeQuery(sorg2);
@@ -143,10 +143,11 @@ public class Homepage extends JFrame {
 
                             // Veritabanına bağlanarak beğeni sayısını güncelle
                             try {
-                                String updateSorg2 = "UPDATE users SET followers = ? WHERE id = ?";
+                                String updateSorg2 = "UPDATE users SET followers = ? WHERE id = ? AND username = ?";
                                 PreparedStatement preparedStatemen2 = conn.prepareStatement(updateSorg2);
                                 preparedStatemen2.setInt(1, takipciSayisi[0]);
                                 preparedStatemen2.setInt(2, id2);
+                                preparedStatemen2.setString(3, yazar);
                                 preparedStatemen2.executeUpdate();
                                 preparedStatemen2.close();
                             } catch (SQLException ex) {
