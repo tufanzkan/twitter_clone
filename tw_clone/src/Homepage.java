@@ -101,7 +101,7 @@ public class Homepage extends JFrame {
             textArea.setEditable(false);
             tpanel.add(textArea,BorderLayout.CENTER);
 
-            JButton likeButton = new JButton("Like (" + begeniSayisi[0] + ")");
+            JButton likeButton = new JButton("Like");
             JButton followButton = new JButton("Follow");
             likeButton.addActionListener(new ActionListener() {
                 private boolean isLiked = false;
@@ -110,7 +110,7 @@ public class Homepage extends JFrame {
                     if (!isLiked) {
                         // Beğeni butonuna tıklandığında beğeni sayısını artır
                         begeniSayisi[0]++;
-                        likeButton.setText("Like (" + begeniSayisi[0] + ")");
+                        likeButton.setText("Liked");
 
                         // Veritabanına bağlanarak beğeni sayısını güncelle
                         try {
@@ -131,6 +131,7 @@ public class Homepage extends JFrame {
             while (resultSe2.next()) {
                 int id2 = resultSe2.getInt("id");
                 final int[] takipciSayisi = {resultSe2.getInt("followers")};
+
                 followButton.addActionListener(new ActionListener() {
                     private boolean isfollowed = false;
                     @Override
@@ -139,10 +140,11 @@ public class Homepage extends JFrame {
                             // Beğeni butonuna tıklandığında beğeni sayısını artır
                             takipciSayisi[0]++;
                             followButton.setText("Followed");
+
                             // Veritabanına bağlanarak beğeni sayısını güncelle
                             try {
-                                String updateSorgu = "UPDATE users SET followers = ? WHERE id = ?";
-                                PreparedStatement preparedStatemen2 = conn.prepareStatement(updateSorgu);
+                                String updateSorg2 = "UPDATE users SET followers = ? WHERE id = ?";
+                                PreparedStatement preparedStatemen2 = conn.prepareStatement(updateSorg2);
                                 preparedStatemen2.setInt(1, takipciSayisi[0]);
                                 preparedStatemen2.setInt(2, id2);
                                 preparedStatemen2.executeUpdate();
