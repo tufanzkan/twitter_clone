@@ -25,15 +25,21 @@ public class Homepage extends JFrame {
 
         conn = DriverManager.getConnection(url,usrnm,password);
         Statement stment = conn.createStatement();
-        String sorg = "SELECT followers FROM users";
+        String sorg = "SELECT username, followers FROM users";
         ResultSet resultS = stment.executeQuery(sorg);
-        int flwrs = 0;
+        JLabel namelabel = null;
+        JLabel flwLabel = null;
+
         while (resultS.next()){
-            flwrs = resultS.getInt("followers");
+            String usname = resultS.getString("username");
+            int flwrs = resultS.getInt("followers");
+            if (usname.equals(username))
+            {
+                namelabel = new JLabel("    "+username);
+                flwLabel = new JLabel("          Followers: "+flwrs);
+            }
         }
 
-        JLabel namelabel = new JLabel("    "+username);
-        JLabel flwLabel = new JLabel("          Followers: "+flwrs);
         JButton button = new JButton("Tweet");
         JPanel panel= new JPanel(new GridLayout(1,3));
         panel.add(namelabel);
@@ -128,36 +134,26 @@ public class Homepage extends JFrame {
                 }
             });
 
-            while (resultSe2.next()) {
-                int id2 = resultSe2.getInt("id");
-                final int[] takipciSayisi = {resultSe2.getInt("followers")};
-
-                followButton.addActionListener(new ActionListener() {
-                    private boolean isfollowed = false;
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if (!isfollowed) {
-                            // Beğeni butonuna tıklandığında beğeni sayısını artır
-                            takipciSayisi[0]++;
-                            followButton.setText("Followed");
-
-                            // Veritabanına bağlanarak beğeni sayısını güncelle
-                            try {
-                                String updateSorg2 = "UPDATE users SET followers = ? WHERE id = ? AND username = ?";
-                                PreparedStatement preparedStatemen2 = conn.prepareStatement(updateSorg2);
-                                preparedStatemen2.setInt(1, takipciSayisi[0]);
-                                preparedStatemen2.setInt(2, id2);
-                                preparedStatemen2.setString(3, yazar);
-                                preparedStatemen2.executeUpdate();
-                                preparedStatemen2.close();
-                            } catch (SQLException ex) {
-                                ex.printStackTrace();
-                            }
-                            isfollowed = true; // Buton artık tıklanamaz hale gelir
+            followButton.addActionListener(new ActionListener() {
+                private boolean isfollowed = false;
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (!isfollowed) {
+                        // Beğeni butonuna tıklandığında beğeni sayısını artır
+                        try {
+                            String updateSorg2 = "UPDATE users SET followers = followers+1 WHERE id = ?";
+                            PreparedStatement preparedStatemen2 = conn.prepareStatement(updateSorg2);
+                            preparedStatemen2.setInt(1, id);
+                            preparedStatemen2.executeUpdate();
+                            preparedStatemen2.close();
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
                         }
+                        followButton.setText("Followed");
+                        isfollowed = true; // Buton artık tıklanamaz hale gelir
                     }
-                });
-            }
+                }
+            });
 
             JPanel likefollow = new JPanel(new GridLayout(1,2));
             likefollow.add(likeButton);
