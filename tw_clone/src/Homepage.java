@@ -107,8 +107,25 @@ public class Homepage extends JFrame {
             textArea.setEditable(false);
             tpanel.add(textArea,BorderLayout.CENTER);
 
-            JButton likeButton = new JButton("Like");
+            JButton likeButton = new JButton("Like (" + begeniSayisi[0] + ")");
             JButton followButton = new JButton("Follow");
+
+            JPanel likefollow = new JPanel(new GridLayout(1,2));
+            LoginRegisterApp lgn = new LoginRegisterApp();
+            String control = lgn.usernameField.getText();
+            String cont = control.toLowerCase();
+
+            if(!cont.equals(yazar)){
+                likefollow.add(followButton);
+                likefollow.add(likeButton);
+            }
+            else{
+                likefollow.add(likeButton);
+            }
+
+            tpanel.add(likefollow,BorderLayout.SOUTH);
+            contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+            contentPanel.add(tpanel);
             likeButton.addActionListener(new ActionListener() {
                 private boolean isLiked = false;
                 @Override
@@ -116,7 +133,7 @@ public class Homepage extends JFrame {
                     if (!isLiked) {
                         // Beğeni butonuna tıklandığında beğeni sayısını artır
                         begeniSayisi[0]++;
-                        likeButton.setText("Liked");
+                        likeButton.setText("Like (" + begeniSayisi[0] + ")");
 
                         // Veritabanına bağlanarak beğeni sayısını güncelle
                         try {
@@ -155,13 +172,6 @@ public class Homepage extends JFrame {
                 }
             });
 
-            JPanel likefollow = new JPanel(new GridLayout(1,2));
-            likefollow.add(likeButton);
-            likefollow.add(followButton);
-
-            tpanel.add(likefollow,BorderLayout.SOUTH);
-            contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-            contentPanel.add(tpanel);
             revalidate();
             repaint();
         }
